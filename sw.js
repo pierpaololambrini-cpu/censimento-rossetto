@@ -1,4 +1,4 @@
-const CACHE = 'censimento-eas-rossetto-v3';
+const CACHE = 'censimento-eas-rossetto-v4';
 const PRECACHE = ['./index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {

@@ -2,10 +2,15 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 <title>Censimento EAS – Gruppo Rossetto</title>
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1F3C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Censimento EAS">
+<link rel="apple-touch-icon" href="icon-192.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
@@ -99,6 +104,10 @@ textarea{resize:vertical;min-height:80px}
 .plbl{flex:1}.plbl .pt{font-size:13px;font-weight:600;color:var(--navy)}.plbl .ps{font-size:11px;color:var(--gray)}
 .pcap{background:var(--navy);color:#fff;border:none;border-radius:7px;padding:9px 12px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif}
 .pcap.done{background:var(--green)}
+.photo-btns{display:flex;gap:6px;flex-shrink:0}
+.pbtn{border:none;border-radius:7px;padding:9px 11px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;-webkit-tap-highlight-color:transparent}
+.pbtn-cam{background:var(--navy);color:#fff}
+.pbtn-gal{background:var(--cream-dark);color:var(--navy)}
 .pprev{display:none;padding:0 14px 14px}
 .pprev.show{display:block}
 .pimg{width:100%;height:200px;object-fit:cover;border-radius:10px;border:1px solid var(--gray-light)}
@@ -173,7 +182,7 @@ input[type=file]{display:none}
 .csd-item.sel{color:var(--red);font-weight:700}
 /* PRINT */
 @media print{
-.header,.snav,.prog,.bnav,.toast,.egrid,.no-print,input[type=file]{display:none!important}
+.header,.snav,.prog,.bnav,.toast,.egrid,.no-print,input[type=file],.photo-btns,.pbtn{display:none!important}
 body{background:#fff;padding:0}
 .card{box-shadow:none;border:1px solid #ddd;page-break-inside:avoid;margin-bottom:8px}
 .section{display:block!important}
@@ -189,7 +198,24 @@ select{font-size:16px!important}
   #printOverlay { position:static!important }
   body > *:not(#printOverlay) { display:none!important }
 }
-
+/* GUIDE MODAL */
+.gd-overlay{display:none;position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.55);-webkit-overflow-scrolling:touch}
+.gd-overlay.open{display:flex;align-items:flex-end;justify-content:center}
+.gd-sheet{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 -4px 32px rgba(0,0,0,.22)}
+.gd-hdr{padding:16px 20px 14px;border-bottom:1px solid var(--gray-light);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;border-radius:20px 20px 0 0;background:var(--navy)}
+.gd-hdr-t{font-size:16px;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px}
+.gd-hdr-x{font-size:24px;cursor:pointer;color:rgba(255,255,255,.7);padding:0 4px;line-height:1;-webkit-tap-highlight-color:transparent}
+.gd-body{overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1;padding:18px 20px 28px}
+.gd-url{background:var(--navy);color:#fff;border-radius:10px;padding:12px 16px;font-family:'DM Mono',monospace;font-size:13px;margin-bottom:18px;word-break:break-all;text-align:center}
+.gd-sec{font-size:12px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.8px;margin:18px 0 8px;padding-bottom:6px;border-bottom:2px solid var(--gray-light)}
+.gd-sec:first-of-type{margin-top:0}
+.gd-step{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start}
+.gd-num{width:24px;height:24px;border-radius:50%;background:var(--navy);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.gd-txt{font-size:14px;color:var(--text);line-height:1.5}
+.gd-txt b{color:var(--navy)}
+.gd-note{background:var(--orange-light);border-left:3px solid var(--orange);border-radius:0 8px 8px 0;padding:10px 14px;font-size:13px;color:var(--text);line-height:1.5;margin:10px 0}
+.gd-tip{background:var(--green-light);border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:10px 14px;font-size:13px;color:var(--text);line-height:1.5;margin:10px 0}
+.hhelp{background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.3);border-radius:8px;padding:8px 12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;-webkit-tap-highlight-color:transparent;margin-right:6px}
 </style>
 </head>
 <body>
@@ -200,6 +226,7 @@ select{font-size:16px!important}
     <div style="width:1px;height:26px;background:rgba(255,255,255,0.25);flex-shrink:0"></div>
     <div><div class="htitle">Censimento EAS</div><div class="hsub">Gruppo Rossetto</div></div>
   </div>
+  <button class="hhelp" onclick="gdOpen()">? Guida</button>
   <button class="hsave" onclick="autoSave()">💾 Bozza</button>
 </div>
 <div class="prog"><div class="ptrack"><div class="pfill" id="progFill" style="width:0%"></div></div></div>
@@ -655,17 +682,25 @@ function buildPhotoList() {
       <div class="phdr">
         <div class="pdot${hasPh?' done':''}" id="pd_${p.id}"></div>
         <div class="plbl"><div class="pt">${p.lbl}${p.req?' <span style="color:var(--red)">*</span>':''}</div><div class="ps">${p.sub}</div></div>
-        <button class="pcap${hasPh?' done':''}" onclick="trigPh('${p.id}')">${hasPh?'✓ Fatto':'📷 Scatta'}</button>
+        ${hasPh
+          ? `<button class="pcap done">✓ Fatto</button>`
+          : `<div class="photo-btns">
+               <button class="pbtn pbtn-cam" onclick="trigPhCam('${p.id}')">📷 Camera</button>
+               <button class="pbtn pbtn-gal" onclick="trigPhGal('${p.id}')">🖼️ Libreria</button>
+             </div>`
+        }
       </div>
       <div class="pprev${hasPh?' show':''}" id="pp_${p.id}">
         ${hasPh?`<img class="pimg" id="pimg_${p.id}" src="${PHDATA[p.id]}" alt="${p.lbl}">
         <div class="pacts">
-          <button class="pact" onclick="trigPh('${p.id}')">🔄 Riprendi</button>
-          <a class="pact dl" id="pdl_${p.id}" href="${PHDATA[p.id]}" download="${photoFilename(p.id)}" onclick="toast('💾 Download avviato!')">💾 Salva foto</a>
+          <button class="pact" onclick="trigPhCam('${p.id}')">📷 Camera</button>
+          <button class="pact" onclick="trigPhGal('${p.id}')">🖼️ Libreria</button>
+          <a class="pact dl" id="pdl_${p.id}" href="${PHDATA[p.id]}" download="${photoFilename(p.id)}" onclick="toast('💾 Download avviato!')">💾 Salva</a>
           <button class="pact del" onclick="delPh('${p.id}')">🗑️</button>
         </div>`:'' }
       </div>
-      <input type="file" id="fi_${p.id}" accept="image/*" capture="environment" onchange="handlePh(event,'${p.id}')">`;
+      <input type="file" id="fi_cam_${p.id}" accept="image/*" capture="environment" onchange="handlePh(event,'${p.id}')">
+      <input type="file" id="fi_gal_${p.id}" accept="image/*" onchange="handlePh(event,'${p.id}')">`;
     list.appendChild(div);
   });
 }
@@ -676,7 +711,8 @@ function photoFilename(id) {
   return `Rossetto_N${n}_${city}_${id}.jpg`;
 }
 
-function trigPh(id) { document.getElementById('fi_' + id).click(); }
+function trigPhCam(id) { document.getElementById('fi_cam_' + id).click(); }
+function trigPhGal(id) { document.getElementById('fi_gal_' + id).click(); }
 function handlePh(e, id) {
   const f = e.target.files[0]; if (!f) return;
 
@@ -773,7 +809,7 @@ function collectData() {
     timestamp: new Date().toISOString(),
     pdv_numero: selPdv?selPdv.n:'', pdv_prov: selPdv?selPdv.prov:'',
     pdv_citta: selPdv?selPdv.citta:'', pdv_indirizzo: selPdv?selPdv.indirizzo:'',
-    pdv_insegna: selPdv?selPdv.insegna:'', pdv_tel: selPdv?selPdv.tel:'', pdv_sap: selPdv?selPdv.sap:'',
+    pdv_sap: selPdv?selPdv.sap:'',
     data: document.getElementById('dataSopr').value,
     ora: document.getElementById('oraSopr').value,
     operatore: document.getElementById('operatore').value,
@@ -795,7 +831,7 @@ function collectData() {
 }
 
 function storeHeader() {
-  return selPdv ? `${selPdv.insegna} – N.${selPdv.n} ${selPdv.citta}\n${selPdv.prov} · ${selPdv.indirizzo}${selPdv.tel?' · Tel. '+selPdv.tel:''}` : 'Gruppo Rossetto';
+  return selPdv ? `Gruppo Rossetto – N.${selPdv.n} ${selPdv.citta}\n${selPdv.prov} · ${selPdv.indirizzo}${selPdv.sap?' · SAP '+selPdv.sap:''}` : 'Gruppo Rossetto';
 }
 
 // ============================================================
@@ -1257,9 +1293,89 @@ function toast(msg) {
   setTimeout(()=>t.classList.remove('show'), 2800);
 }
 </script>
-
 <script>
-if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js"));
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('./sw.js');
+  });
+}
+</script>
+
+<!-- GUIDE MODAL -->
+<div class="gd-overlay" id="gdOverlay" onclick="gdCloseBackdrop(event)">
+  <div class="gd-sheet">
+    <div class="gd-hdr">
+      <div class="gd-hdr-t">📋 Guida all'utilizzo</div>
+      <span class="gd-hdr-x" onclick="gdClose()">✕</span>
+    </div>
+    <div class="gd-body">
+
+      <p class="gd-txt" style="margin-bottom:14px">Modulo digitale per il <b>censimento dei punti di vendita Rossetto</b> ai fini dell'installazione dei sistemi EAS (antitaccheggio) Checkpoint.</p>
+
+      <div class="gd-sec">Accesso e installazione</div>
+      <div class="gd-step"><div class="gd-num">1</div><div class="gd-txt">Apri <b>Safari</b> sul tuo iPhone/iPad o <b>Chrome</b> su Android e vai all'indirizzo:</div></div>
+      <div class="gd-url">https://pierpaololambrini-cpu.github.io/censimento-gulliver/</div>
+      <div class="gd-step"><div class="gd-num">2</div><div class="gd-txt">Per installarlo come app: tocca <b>Condividi</b> (□↑) → <b>Aggiungi a schermata Home</b>. Così avrai l'icona sul telefono e funziona anche offline.</div></div>
+
+      <div class="gd-sec">Sezione 1 – Punto di Vendita</div>
+      <div class="gd-step"><div class="gd-num">1</div><div class="gd-txt">Tocca <b>Provincia</b> e seleziona la provincia del negozio dal menu.</div></div>
+      <div class="gd-step"><div class="gd-num">2</div><div class="gd-txt">Tocca <b>Città</b> (si sblocca dopo la provincia) e seleziona la città.</div></div>
+      <div class="gd-step"><div class="gd-num">3</div><div class="gd-txt">Tocca <b>Punto di vendita</b> e seleziona l'indirizzo del negozio.</div></div>
+      <div class="gd-step"><div class="gd-num">4</div><div class="gd-txt">Inserisci la <b>data del sopralluogo</b> e i dati del referente (nome, telefono, email).</div></div>
+
+      <div class="gd-sec">Sezione 2 – Varchi EAS</div>
+      <div class="gd-step"><div class="gd-num">1</div><div class="gd-txt">Usa i tasti <b>＋</b> e <b>−</b> per indicare il numero di varchi EAS presenti nel punto di vendita.</div></div>
+      <div class="gd-step"><div class="gd-num">2</div><div class="gd-txt">Per ciascun varco compila i campi: <b>posizione</b>, <b>larghezza</b> e <b>tipologia antenna</b>.</div></div>
+
+      <div class="gd-sec">Sezione 3 – Casse</div>
+      <div class="gd-step"><div class="gd-num">1</div><div class="gd-txt">Indica il numero di casse per ciascuna categoria: <b>standard</b>, <b>self-checkout</b>, <b>veloci</b>.</div></div>
+      <div class="gd-step"><div class="gd-num">2</div><div class="gd-txt">Specifica se ci sono <b>barriere laterali</b> o altri elementi da segnalare.</div></div>
+
+      <div class="gd-sec">Sezione 4 – Foto</div>
+      <div class="gd-step"><div class="gd-num">1</div><div class="gd-txt">Per ogni postazione sono disponibili due pulsanti: <b>📷 Fotocamera</b> (scatta una nuova foto) e <b>🖼 Galleria</b> (allega una foto già presente sul telefono).</div></div>
+      <div class="gd-step"><div class="gd-num">2</div><div class="gd-txt">Una volta aggiunta, la foto appare in anteprima. Puoi <b>eliminarla</b> o <b>salvarla</b> singolarmente.</div></div>
+      <div class="gd-step"><div class="gd-num">3</div><div class="gd-txt">Completa tutte le postazioni richieste: il cerchio verde ✓ indica che la foto è stata inserita.</div></div>
+      <div class="gd-note">⚠️ Su iPhone, se vuoi salvare le foto sul dispositivo usare il pulsante <b>💾 Salva</b> su ogni singola foto prima di esportare.</div>
+
+      <div class="gd-sec">Sezione 5 – Note</div>
+      <div class="gd-step"><div class="gd-num">1</div><div class="gd-txt">Scrivi eventuali <b>osservazioni aggiuntive</b> nel campo testo libero.</div></div>
+      <div class="gd-step"><div class="gd-num">2</div><div class="gd-txt">Seleziona le <b>problematiche rilevate</b> toccando i tag corrispondenti (es. "Spazio insufficiente", "Ostacoli strutturali").</div></div>
+
+      <div class="gd-sec">Sezione 6 – Riepilogo ed esportazione</div>
+      <div class="gd-step"><div class="gd-num">1</div><div class="gd-txt">Verifica il <b>riepilogo</b> di tutti i dati inseriti nelle sezioni precedenti.</div></div>
+      <div class="gd-step"><div class="gd-num">2</div><div class="gd-txt">Per inviare via email scegli uno di questi metodi:</div></div>
+
+      <div style="background:var(--cream);border-radius:10px;padding:14px;margin:10px 0">
+        <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px">METODO A – PDF (consigliato)</div>
+        <div class="gd-txt" style="margin-bottom:5px">① Tocca <b>📄 Esporta PDF</b></div>
+        <div class="gd-txt" style="margin-bottom:5px">② Il PDF si apre → tocca <b>Condividi</b> → seleziona <b>Mail</b></div>
+        <div class="gd-txt">③ Scrivi l'oggetto (es: "Censimento Rossetto – Milano") e invia</div>
+      </div>
+      <div style="background:var(--cream);border-radius:10px;padding:14px;margin:10px 0">
+        <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px">METODO B – Testo (rapido)</div>
+        <div class="gd-txt" style="margin-bottom:5px">① Tocca <b>📋 Copia negli Appunti</b></div>
+        <div class="gd-txt" style="margin-bottom:5px">② Apri <b>Mail</b> → Nuovo messaggio → tieni premuto → <b>Incolla</b></div>
+        <div class="gd-txt">③ Aggiungi le foto come allegati → Invia</div>
+      </div>
+
+      <div class="gd-tip">💡 Usa <b>💾 Bozza</b> (in alto a destra) per salvare i dati sul dispositivo in qualsiasi momento. I dati restano salvati anche se chiudi il browser.</div>
+
+      <div class="gd-sec">Prima di un nuovo censimento</div>
+      <div class="gd-step"><div class="gd-num">1</div><div class="gd-txt">Nella sezione 6, tocca <b>📋 Storico</b> per verificare i censimenti già inviati.</div></div>
+      <div class="gd-step"><div class="gd-num">2</div><div class="gd-txt">Tocca <b>🔄 Nuovo censimento</b> per azzerare il modulo e iniziare un nuovo sopralluogo.</div></div>
+
+      <div style="text-align:center;margin-top:22px;padding-top:14px;border-top:1px solid var(--gray-light)">
+        <div style="font-size:11px;color:var(--gray)">Checkpoint Systems – Gruppo Rossetto</div>
+        <div style="font-size:11px;color:var(--gray);margin-top:2px">Versione PWA · Supporto: IT Checkpoint</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script>
+function gdOpen() { document.getElementById('gdOverlay').classList.add('open'); }
+function gdClose() { document.getElementById('gdOverlay').classList.remove('open'); }
+function gdCloseBackdrop(e) { if (e.target === document.getElementById('gdOverlay')) gdClose(); }
 </script>
 </body>
 </html>
